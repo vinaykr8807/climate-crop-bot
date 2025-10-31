@@ -14,7 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analytics: {
+        Row: {
+          avg_soil_moisture: number | null
+          avg_temp: number | null
+          id: string
+          region: string
+          total_queries: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_soil_moisture?: number | null
+          avg_temp?: number | null
+          id?: string
+          region: string
+          total_queries?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_soil_moisture?: number | null
+          avg_temp?: number | null
+          id?: string
+          region?: string
+          total_queries?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      chat_history: {
+        Row: {
+          farmer_id: string | null
+          id: string
+          llm_response: string | null
+          soil: Json | null
+          source: string | null
+          timestamp: string | null
+          translated_message: string | null
+          translated_response: string | null
+          user_message: string
+          weather: Json | null
+        }
+        Insert: {
+          farmer_id?: string | null
+          id?: string
+          llm_response?: string | null
+          soil?: Json | null
+          source?: string | null
+          timestamp?: string | null
+          translated_message?: string | null
+          translated_response?: string | null
+          user_message: string
+          weather?: Json | null
+        }
+        Update: {
+          farmer_id?: string | null
+          id?: string
+          llm_response?: string | null
+          soil?: Json | null
+          source?: string | null
+          timestamp?: string | null
+          translated_message?: string | null
+          translated_response?: string | null
+          user_message?: string
+          weather?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_history_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "farmers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farmers: {
+        Row: {
+          created_at: string | null
+          id: string
+          location: Json | null
+          name: string | null
+          phone_number: string | null
+          preferred_language: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          location?: Json | null
+          name?: string | null
+          phone_number?: string | null
+          preferred_language?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          location?: Json | null
+          name?: string | null
+          phone_number?: string | null
+          preferred_language?: string | null
+        }
+        Relationships: []
+      }
+      soil_data: {
+        Row: {
+          data: Json
+          farmer_id: string | null
+          fetched_at: string | null
+          id: string
+          region: string
+        }
+        Insert: {
+          data: Json
+          farmer_id?: string | null
+          fetched_at?: string | null
+          id?: string
+          region: string
+        }
+        Update: {
+          data?: Json
+          farmer_id?: string | null
+          fetched_at?: string | null
+          id?: string
+          region?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "soil_data_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "farmers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weather_data: {
+        Row: {
+          data: Json
+          farmer_id: string | null
+          fetched_at: string | null
+          id: string
+          region: string
+        }
+        Insert: {
+          data: Json
+          farmer_id?: string | null
+          fetched_at?: string | null
+          id?: string
+          region: string
+        }
+        Update: {
+          data?: Json
+          farmer_id?: string | null
+          fetched_at?: string | null
+          id?: string
+          region?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weather_data_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "farmers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
