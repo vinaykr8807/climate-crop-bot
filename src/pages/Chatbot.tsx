@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Send, Loader2, Bot, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   role: "user" | "assistant";
@@ -38,22 +39,46 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Connect to backend API
-      // For now, simulate AI response
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Get user location (default to Pune coordinates)
+      const location = {
+        latitude: 18.5204,
+        longitude: 73.8567,
+        district: "Pune",
+      };
+
+      // Call chat API with full context
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: {
+          message: input,
+          language: language,
+          location: location,
+        }
+      });
+
+      if (error) throw error;
 
       const aiResponse: Message = {
         role: "assistant",
-        content: `I understand you're asking about: "${input}". To provide you with accurate agricultural advice, I'll need to integrate with the weather and soil data APIs. Please ensure the backend API keys are configured.`,
+        content: data.response,
       };
 
       setMessages((prev) => [...prev, aiResponse]);
+
+      toast({
+        title: "Response received",
+        description: "AgriGenius AI has analyzed your query with current weather and soil data.",
+      });
     } catch (error) {
+      console.error('Chat error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get response. Please try again.';
       toast({
         title: "Error",
-        description: "Failed to get response. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+
+      // Remove the user message on error
+      setMessages((prev) => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
@@ -171,7 +196,7 @@ const Chatbot = () => {
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-4">
-          Note: Backend API integration required for full functionality
+          Powered by OpenWeatherMap, NASA POWER, Ollama AI, and iFlytek Translation
         </p>
       </main>
 
