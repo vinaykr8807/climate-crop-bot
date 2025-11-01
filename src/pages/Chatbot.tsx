@@ -114,8 +114,6 @@ const Chatbot = () => {
               <SelectContent>
                 <SelectItem value="en">English</SelectItem>
                 <SelectItem value="hi">हिंदी (Hindi)</SelectItem>
-                <SelectItem value="ta">தமிழ் (Tamil)</SelectItem>
-                <SelectItem value="mr">मराठी (Marathi)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -196,7 +194,7 @@ const Chatbot = () => {
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-4">
-          Powered by OpenWeatherMap, NASA POWER, Ollama AI, and iFlytek Translation
+          Powered by OpenWeatherMap, NASA POWER, Ollama AI, and LibreTranslate
         </p>
       </main>
 

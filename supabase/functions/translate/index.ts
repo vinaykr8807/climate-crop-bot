@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { crypto } from "https://deno.land/std@0.177.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,13 +12,6 @@ serve(async (req) => {
 
   try {
     const { text, from, to } = await req.json();
-    
-    const IFLYTEK_APP_ID = Deno.env.get('IFLYTEK_APP_ID');
-    const IFLYTEK_API_KEY = Deno.env.get('IFLYTEK_API_KEY');
-
-    if (!IFLYTEK_APP_ID || !IFLYTEK_API_KEY) {
-      throw new Error('iFlytek API credentials not configured');
-    }
 
     // If source and target language are the same, return original text
     if (from === to) {
@@ -28,52 +20,31 @@ serve(async (req) => {
       });
     }
 
-    // Generate timestamp and signature for iFlytek API
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const encoder = new TextEncoder();
-    const encodedData = encoder.encode(IFLYTEK_APP_ID + timestamp);
-    const hashBuffer = await crypto.subtle.digest('MD5', encodedData);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const checkSum = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    console.log(`Translating from ${from} to ${to} using LibreTranslate`);
 
-    const url = 'https://itrans.xfyun.cn/v2/its';
-    
-    const requestBody = {
-      common: { app_id: IFLYTEK_APP_ID },
-      business: {
-        from: from,
-        to: to,
-      },
-      data: {
-        text: btoa(text),
-      },
-    };
-
-    const response = await fetch(url, {
+    // Use LibreTranslate (free, no API key needed, supports Hindi and Indian languages)
+    const response = await fetch('https://libretranslate.com/translate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Appid': IFLYTEK_APP_ID,
-        'X-CurTime': timestamp,
-        'X-CheckSum': checkSum,
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        q: text,
+        source: from === 'auto' ? 'auto' : from,
+        target: to,
+        format: 'text',
+      }),
     });
 
     if (!response.ok) {
-      console.error('iFlytek API error:', await response.text());
+      console.error('LibreTranslate API error:', response.status);
       throw new Error('Translation failed');
     }
 
-    const responseData = await response.json();
-    
-    if (responseData.code !== 0) {
-      throw new Error(`Translation error: ${responseData.message}`);
-    }
+    const data = await response.json();
+    const translatedText = data.translatedText || text;
 
-    const translatedText = atob(responseData.data.result.trans_result.dst);
-
-    console.log(`Translated from ${from} to ${to}`);
+    console.log(`Translated successfully: ${text.substring(0, 50)}... -> ${translatedText.substring(0, 50)}...`);
 
     return new Response(
       JSON.stringify({ translated_text: translatedText }),

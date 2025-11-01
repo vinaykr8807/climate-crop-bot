@@ -88,20 +88,19 @@ Provide practical, actionable agricultural advice based on the current weather a
 
     // Call Ollama Cloud API
     console.log('Calling Ollama API...');
-    const ollamaResponse = await fetch('https://api.ollama.com/v1/chat/completions', {
+    const ollamaResponse = await fetch('https://api.ollama.ai/v1/chat', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OLLAMA_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama3.1',
+        model: 'gpt-oss:20b-cloud',
         messages: [
-          { role: 'system', content: context },
-          { role: 'user', content: translatedMessage }
+          { role: 'system', content: 'You are an expert agricultural advisor. Keep answers safe and practical.' },
+          { role: 'user', content: context }
         ],
-        temperature: 0.7,
-        max_tokens: 500,
+        stream: false,
       }),
     });
 
@@ -112,7 +111,22 @@ Provide practical, actionable agricultural advice based on the current weather a
     }
 
     const ollamaData = await ollamaResponse.json();
-    let aiResponse = ollamaData.choices[0].message.content;
+    console.log('Ollama response received:', ollamaData);
+    
+    // Handle different response formats from Ollama
+    let aiResponse: string;
+    if (ollamaData.choices && ollamaData.choices[0]?.message?.content) {
+      aiResponse = ollamaData.choices[0].message.content;
+    } else if (ollamaData.message?.content) {
+      aiResponse = ollamaData.message.content;
+    } else if (ollamaData.response) {
+      aiResponse = ollamaData.response;
+    } else if (ollamaData.content) {
+      aiResponse = ollamaData.content;
+    } else {
+      console.error('Unexpected Ollama response format:', ollamaData);
+      aiResponse = JSON.stringify(ollamaData).substring(0, 1500);
+    }
 
     // Translate response back to user's language if needed
     let translatedResponse = aiResponse;
