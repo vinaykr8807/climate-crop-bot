@@ -88,7 +88,7 @@ Provide practical, actionable agricultural advice based on the current weather a
 
     // Call Ollama Cloud API
     console.log('Calling Ollama API...');
-    const ollamaResponse = await fetch('https://api.ollama.ai/v1/chat', {
+    const ollamaResponse = await fetch('https://ollama.com/api/chat', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OLLAMA_API_KEY}`,
