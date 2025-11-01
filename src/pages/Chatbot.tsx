@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Send, Loader2, Bot, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   role: "user" | "assistant";
@@ -155,9 +157,17 @@ const Chatbot = () => {
                       : "bg-muted text-foreground"
                   }`}
                 >
-                  <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  {message.role === "assistant" ? (
+                    <div className="text-sm sm:text-base leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-table:text-foreground prose-th:text-foreground prose-td:text-foreground">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+                  )}
                 </div>
 
                 {message.role === "user" && (

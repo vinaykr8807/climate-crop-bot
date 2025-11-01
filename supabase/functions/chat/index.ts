@@ -65,25 +65,48 @@ serve(async (req) => {
       translatedMessage = translateData.translated_text;
     }
 
-    // Create context for LLM
+    // Create context for LLM with detailed weather and soil data
     const context = `
-You are AgriGenius AI, an expert agricultural assistant helping farmers in India.
+You are AgriGenius AI, an expert agricultural assistant helping farmers in India with real-time weather and soil data.
 
-Current weather conditions for ${location.district}:
-- Temperature: ${weatherData.current?.temperature}°C
+## Current Location: ${location.district}
+
+### Real-Time Weather Data (OpenWeatherMap API):
+**Current Conditions:**
+- Temperature: ${weatherData.current?.temperature}°C (Feels like: ${weatherData.current?.feels_like}°C)
 - Humidity: ${weatherData.current?.humidity}%
 - Weather: ${weatherData.current?.description}
 - Wind Speed: ${weatherData.current?.wind_speed} m/s
+- Atmospheric Pressure: ${weatherData.current?.pressure} hPa
+- Cloud Cover: ${weatherData.current?.clouds}%
 
-Soil conditions:
-- Moisture: ${soilData.soil?.moisture_percentage}%
-- Status: ${soilData.soil?.status}
-- Temperature: ${soilData.soil?.temperature}°C
-- Recommendation: ${soilData.recommendation}
+**Upcoming 24-Hour Forecast:**
+${weatherData.forecast?.slice(0, 4).map((f: any) => 
+  `- ${f.datetime}: ${f.temperature}°C, ${f.description}, Humidity: ${f.humidity}%, Rain Probability: ${f.rain_probability}%`
+).join('\n')}
 
-Farmer's question: ${translatedMessage}
+### Satellite Soil Data (NASA POWER API):
+**Current Soil Conditions:**
+- Soil Moisture: ${soilData.soil?.status} (${soilData.soil?.moisture_percentage}%)
+- Soil Temperature: ${soilData.soil?.temperature}°C
+- Average Precipitation: ${soilData.climate?.avg_precipitation_mm} mm
+- Average Humidity: ${soilData.climate?.avg_humidity_percent}%
+- Solar Radiation: ${soilData.climate?.avg_solar_radiation} W/m²
 
-Provide practical, actionable agricultural advice based on the current weather and soil conditions. Be concise and farmer-friendly.
+**Expert Recommendation:** ${soilData.recommendation}
+
+### Farmer's Question:
+${translatedMessage}
+
+## Instructions:
+Analyze ALL the provided weather, soil, and climate data comprehensively. Provide:
+1. Immediate actionable advice based on current conditions
+2. Short-term recommendations considering the forecast
+3. Specific crop management tips relevant to the weather patterns
+4. Water management guidance based on soil moisture and rainfall probability
+5. Risk alerts (if any) based on temperature, humidity, or soil conditions
+
+Format your response in clear sections with markdown formatting. Use tables where appropriate. Be practical, specific, and farmer-friendly.
 `;
 
     // Call Ollama Cloud API
