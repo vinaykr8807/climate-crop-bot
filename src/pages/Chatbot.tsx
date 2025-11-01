@@ -27,14 +27,19 @@ const Chatbot = () => {
   const { toast } = useToast();
 
   const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading) {
+      console.log('Input validation failed:', { input: input.trim(), isLoading });
+      return;
+    }
 
+    console.log('Sending message:', input);
     const userMessage: Message = {
       role: "user",
       content: input,
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const messageToSend = input; // Store before clearing
     setInput("");
     setIsLoading(true);
 
@@ -46,16 +51,24 @@ const Chatbot = () => {
         district: "Pune",
       };
 
+      console.log('Calling chat function with:', { message: messageToSend, language, location });
+
       // Call chat API with full context
       const { data, error } = await supabase.functions.invoke('chat', {
         body: {
-          message: input,
+          message: messageToSend,
           language: language,
           location: location,
         }
       });
 
+      console.log('Function response:', { data, error });
+
       if (error) throw error;
+
+      if (!data?.response) {
+        throw new Error('No response received from AI');
+      }
 
       const aiResponse: Message = {
         role: "assistant",
